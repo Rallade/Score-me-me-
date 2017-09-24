@@ -21,25 +21,28 @@ def process():
         message = dict(request.args)
         text = message['text']
         msisdn = message['msisdn']
-        print(dict(request.args))
         sent = text[0]
-        sent = nltk.word_tokenize(sent)
-        sent = nltk.pos_tag(sent)
+        full = sent
+        try:
+            sent = nltk.word_tokenize(sent)
+            sent = nltk.pos_tag(sent)
+            sites = [word[0] + '.com' for word in sent if (word[1] == 'NN' or word[1] == 'JJ' or word[1] == 'RB' or word[1] == 'RBR')]
 
-        sites = [word[0] + '.com' for word in sent if (word[1] == 'NN' or word[1] == 'JJ' or word[l] == 'RB' or word[1] == 'RBR')]
-
-        for site in sites:
-            with urllib.request.urlopen('https://api.majestic.com/api/json?app_api_key='+m_key+'&cmd=GetTopics&item='+site+'&datasource=fresh&count=10') as url:
-                data = json.loads(url.read().decode())
-                topics = data['DataTables']['Topics']['Data']
-            for topic in topics:
-                print(topic['Topic'])
-                print('Computer' in topic['Topic'])
-                if 'Computer' in topic['Topic']:
-                    print(topic['TopicalTrustFlow'])
-                    meme_score += topic['TopicalTrustFlow']
+            for site in sites:
+                with urllib.request.urlopen('https://api.majestic.com/api/json?app_api_key='+m_key+'&cmd=GetTopics&item='+site+'&datasource=fresh&count=10') as url:
+                    data = json.loads(url.read().decode())
+                    topics = data['DataTables']['Topics']['Data']
+                for topic in topics:
+                    print(topic['Topic'])
+                    print('Computer' in topic['Topic'])
+                    if 'Computer' in topic['Topic']:
+                        print(topic['TopicalTrustFlow'])
+                        meme_score += topic['TopicalTrustFlow']
+        except:
+            pass
         text = 'Your meme score was ' + str(meme_score)
         if meme_score > high_score:
+            print('top player', msisdn, full)
             top_player = msisdn
             text += '\nThat\'s a new high score!'
         
